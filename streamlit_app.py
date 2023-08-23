@@ -2,7 +2,7 @@ import streamlit as st
 import openai
 
 # App title
-st.title('🤖🔎 OpenAI Fine-Tuning')
+st.title('Wise Old Owl Advice Bot')
 
 # Check for OpenAI API Key in Streamlit's secrets
 if 'OPENAI_API_KEY' in st.secrets:
@@ -13,33 +13,18 @@ else:
     if not openai_api_key.startswith('sk-'):
         st.sidebar.warning('Please enter your OpenAI API key!')
 
-# File Uploader for Fine-Tuning
-uploaded_file = st.sidebar.file_uploader("Upload your training dataset (in .jsonl format)", type="jsonl")
-
-# Fine-Tuning Button
-if st.sidebar.button('Start Fine-Tuning'):
-    if uploaded_file and openai_api_key.startswith('sk-'):
-        # Upload the Dataset to OpenAI
-        uploaded = openai.File.create(file=uploaded_file, purpose='fine-tune')
-        
-        # Start the Fine-Tuning Job
-        openai.api_key = openai_api_key
-        response = openai.FineTuningJob.create(training_file=uploaded.id, model="gpt-3.5-turbo")
-        
-        if response:
-            st.sidebar.write("Fine-tuning started successfully!")
-        else:
-            st.sidebar.write("Error starting fine-tuning. Please check your dataset and API key.")
-    else:
-        st.sidebar.warning("Ensure you've uploaded a dataset and provided a valid API key!")
-
-def generate_response(input_text):
-    # Assuming OpenAI() works similar to openai.Completion.create
-    response = openai.Completion.create(model="fine-tuned-model-id-if-any", prompt=input_text)
+# Using the fine-tuned model to generate responses
+def generate_response(input_text, model_name):
+    openai.api_key = openai_api_key
+    response = openai.Completion.create(
+        model=model_name,
+        prompt=f"You are a wise old owl giving sage advice.\n{input_text}"
+    )
     st.info(response.choices[0].text)
 
 with st.form('my_form'):
-    text = st.text_area('Enter text:', 'What are the three key pieces of advice for learning how to code?')
-    submitted = st.form_submit_button('Submit')
+    text = st.text_area('Seek advice:', 'How can I find inner peace?')
+    submitted = st.form_submit_button('Ask the Wise Old Owl')
     if submitted and openai_api_key.startswith('sk-'):
-        generate_response(text)
+        # Replace 'your-fine-tuned-model-id' with the ID of your fine-tuned model
+        generate_response(text, 'your-fine-tuned-model-id')
